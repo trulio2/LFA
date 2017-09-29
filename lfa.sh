@@ -1,7 +1,6 @@
 #!/bin/bash
 checkfinal()
 {
- echo "${atual[$1]} -> $1 "
  for (( k = 0; k < ${#finals[@]}; k++ )); do
   if [[ ${atual[$1]} == ${finals[$k]} ]]; then
     check="Sim"
@@ -33,11 +32,9 @@ for arq in $(cat $1); do
   else
    grafo=$(echo $grafo$estado | sed "s:,: :g" | sed "s:\]::g" | sed "s:\[::g")
   fi
-
   est=''
   let mudaestado++
  fi
-
 done
 initials=$(echo "$estado" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $1}')
 finals=$(echo "$estado" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $2}')
@@ -78,35 +75,39 @@ verificar(){
  if [[ $3 -ge ${#teste[@]} ]]; then
    let final=$3+1
    checkfinal $final
-   echo ${atual[@]}
  else
-  for (( i=0; i < ${#estados[@]}; i++ )); do
-    if [[ ${matriz[$2,$i]} == ${teste[$3]} || ${matriz[$2,$i]} == '#' ]]; then
-      atual[$1]=$i
-      let inseridos=$1+1
-      let test=$3+1
-      if [[ ${matriz[$2,$i]} == '#' ]]; then
-       let test--
-      fi
-      verificar $inseridos $i $test
-    fi
-  done
+  if [[ $check == "Nao" ]]; then
+   local i=0
+   for (( ; i < ${#estados[@]}; i++ )); do
+     if [[ ${matriz[$2,$i]} == ${teste[$3]} || ${matriz[$2,$i]} == '#' ]]; then
+       atual[$1]=$i
+       let  inseridos=$1+1
+       let  test=$3+1
+       if [[ ${matriz[$2,$i]} == '#' ]]; then
+        let test--
+       fi
+       verificar $inseridos $i $test
+     fi
+   done
+  fi
  fi
 }
-
 
 while true; do
  read teste
  teste=$(echo ${teste} | grep -o .)
  teste=(${teste})
-
  for init in ${initials[@]}; do
+   for (( n=0; n< ${#atual[@]}; n++ )); do
+    atual[$n]=''
+   done
    inseridos=1
    test=0
    check="Nao"
    atual[0]=${initials[$init]}
    verificar $inseridos ${atual[0]} $test
    if [[ $check == "Sim" ]]; then
+      echo ${atual[@]}
       break
    fi
  done
