@@ -19,10 +19,10 @@ for arq in $(cat $1); do
   let mudaestado++
  fi
 done
-initials=$(echo "$estado" | tr -d [" " | tr , " "| awk -F"]" '{print $1}')
-finals=$(echo "$estado" | tr -d [" " |tr , " "  | awk -F"]" '{print $2}')
-estados=$(echo "$estadosiniciais" | tr -d [" " | tr , " "  | awk -F"]" '{print $1}')
-transicoes=$(echo "$estadosiniciais" | tr -d [" " | tr , " " | awk -F"]" '{print $2}')
+initials=$(echo "${estado//[}" | tr -d " " | tr , " "| awk -F"]" '{print $1}')
+finals=$(echo "${estado//[}" | tr -d " " |tr , " "  | awk -F"]" '{print $2}')
+estados=$(echo "${estadosiniciais//[}" | tr -d " " | tr , " "  | awk -F"]" '{print $1}')
+transicoes=$(echo "${estadosiniciais//[}" | tr -d " " | tr , " " | awk -F"]" '{print $2}')
 
 estados=(${estados})
 for i in ${!estados[@]}; do
@@ -99,7 +99,7 @@ while true; do
    done
    [[ $b == 1 ]] && { break; }
    for n in ${!atual[@]}; do
-    atual[$n]=''
+    unset atual[$n]
    done
    inseridos=1
    test=0
