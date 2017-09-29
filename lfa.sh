@@ -1,6 +1,5 @@
 #!/bin/bash
-checkfinal()
-{
+checkfinal(){
  for (( k = 0; k < ${#finals[@]}; k++ )); do
   if [[ ${atual[$1]} == ${finals[$k]} ]]; then
     check="Sim"
@@ -19,7 +18,6 @@ if [[ $# -ne 1  ]]; then
 fi
 
 mudaestado=0
-
 for arq in $(cat $1); do
  arq=$(echo $arq  | sed "s:\"::g" | sed "s:\}::g" | sed "s:\,::g")
  if [[ $mudaestado > 0 ]]; then
@@ -42,7 +40,6 @@ estados=$(echo "$estadosiniciais" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g
 transicoes=$(echo "$estadosiniciais" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $2}')
 
 estados=(${estados})
-
 for (( i = 0; i < ${#estados[@]}; i++ )); do
   grafo=$(echo $grafo | sed "s:${estados[$i]}:$i:g")
   initials=$(echo $initials | sed "s:${estados[$i]}:$i:g")
@@ -61,9 +58,7 @@ for (( i=0; i<${#estados[@]}; i++  )); do
       matriz["$i","$j"]=""
    done
 done
-
 remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
-
 for (( i = ${#grafo[@]}; i >= $remover; i-- )); do
     grafo[$i]=''
 done
@@ -77,6 +72,10 @@ verificar(){
    checkfinal $final
  else
   if [[ $check == "Nao" ]]; then
+   if [[ ${teste[$3]} == '#' ]]; then
+     let hash=$1-1
+     checkfinal $hash
+   fi
    local i=0
    for (( ; i < ${#estados[@]}; i++ )); do
      if [[ ${matriz[$2,$i]} == ${teste[$3]} || ${matriz[$2,$i]} == '#' ]]; then
@@ -92,8 +91,6 @@ verificar(){
   fi
  fi
 }
-
-
 while true; do
  read teste
  teste=$(echo ${teste} | grep -o .)
@@ -113,4 +110,3 @@ while true; do
  done
   echo $check
 done
-
