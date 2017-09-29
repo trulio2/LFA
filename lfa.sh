@@ -1,12 +1,4 @@
 #!/bin/bash
-checkfinal(){
- for (( k = 0; k < ${#finals[@]}; k++ )); do
-  [[ ${atual[$1]} == ${finals[$k]} ]] && { check="Sim"; break; }
- done
- [[ $k -eq ${#finals[@]} ]] && { check="Nao"; }
-}
-
-
 if [[ $# -ne 1  ]]; then
 	echo "Usar: $0 [AFNλ]" 1>&2
 	exit 1
@@ -59,6 +51,13 @@ for (( i = 0; i < $remover; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
 
+checkfinal(){
+ for (( k = 0; k < ${#finals[@]}; k++ )); do
+  [[ ${atual[$1]} == ${finals[$k]} ]] && { check="Sim"; break; }
+ done
+ [[ $k -eq ${#finals[@]} ]] && { check="Nao"; }
+}
+
 verificar(){
  if [[ $3 -ge ${#teste[@]} ]]; then
    let final=$1-1
@@ -92,12 +91,17 @@ while true; do
  teste=$(echo ${teste} | grep -o .)
  teste=(${teste})
  for init in ${initials[@]}; do
+   check="Nao"
+   b=0; u=0
+   for u in ${!teste[@]}; do
+    [[ ${teste[$u]} == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
+   done
+   [[ $b == 1 ]] && { break; }
    for n in ${!atual[@]}; do
     atual[$n]=''
    done
    inseridos=1
    test=0
-   check="Nao"
    atual[0]=${initials[$init]}
    verificar $inseridos ${atual[0]} $test
    [[ $check == "Sim" ]] && {  break; }
