@@ -6,23 +6,23 @@ fi
 
 mudaestado=0
 for arq in $(cat $1); do
- arq=$(echo $arq  | sed "s:\"::g" | sed "s:\}::g" | sed "s:\,::g")
+ arq=$(echo $arq  | tr -d \"},)
  [[ $mudaestado > 0 ]] && { est=$(echo "$est,$arq"); }
  if [[ $arq == '[' || $arq == ']' ]]; then
   estado=$(echo "$est")
   if [[ $mudaestado == 1 ]]; then
   estadosiniciais=$estado
   else
-   grafo=$(echo $grafo$estado | sed "s:,: :g" | sed "s:\]::g" | sed "s:\[::g")
+   grafo=$(echo $grafo$estado | tr , " " |tr -d [])
   fi
   est=''
   let mudaestado++
  fi
 done
-initials=$(echo "$estado" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $1}')
-finals=$(echo "$estado" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $2}')
-estados=$(echo "$estadosiniciais" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $1}')
-transicoes=$(echo "$estadosiniciais" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $2}')
+initials=$(echo "$estado" | tr -d [" " | tr , " "| awk -F"]" '{print $1}')
+finals=$(echo "$estado" | tr -d [" " |tr , " "  | awk -F"]" '{print $2}')
+estados=$(echo "$estadosiniciais" | tr -d [" " | tr , " "  | awk -F"]" '{print $1}')
+transicoes=$(echo "$estadosiniciais" | tr -d [" " | tr , " " | awk -F"]" '{print $2}')
 
 estados=(${estados})
 for i in ${!estados[@]}; do
@@ -71,10 +71,10 @@ verificar(){
      valores=$( echo ${matriz[$2,$i]} | fold -w1)
      valores=(${valores})
      for val in ${valores[@]}; do
-        [[ $val == ${teste[$3]} ]] && { conf=1; break; }
+        [[ $val == ${teste[$3]} || $val == '#' ]] && { conf=1; break; }
         conf=0
      done
-     if [[ $conf -eq 1 || ${matriz[$2,$i]} == '#' ]]; then
+     if [[ $conf -eq 1 ]]; then
        atual[$1]=$i
        let inseridos=$1+1
        let test=$3+1
