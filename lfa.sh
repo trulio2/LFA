@@ -13,7 +13,7 @@ checkfinal()
 }
 
 
-if [[ $# == 0  ]]; then
+if [[ $# -ne 1  ]]; then
 	echo "Usar: $0 [AFNλ]" 1>&2
 	exit 1
 fi
@@ -58,7 +58,7 @@ grafo=(${grafo})
 declare -A matriz
 for (( i=0; i<${#estados[@]}; i++  )); do
    for (( j=0; j<${#estados[@]}; j++ )); do
-      matriz["$i","$j"]="-1"
+      matriz["$i","$j"]=""
    done
 done
 
@@ -68,7 +68,7 @@ for (( i = ${#grafo[@]}; i >= $remover; i-- )); do
     grafo[$i]=''
 done
 for (( i = 0; i < $remover; i+=3 )); do
-  matriz[${grafo[$i]},${grafo[$i+2]}]=${grafo[$i+1]}
+  matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
 
 verificar(){
@@ -92,6 +92,7 @@ verificar(){
   fi
  fi
 }
+
 
 while true; do
  read teste
