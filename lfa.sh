@@ -25,13 +25,6 @@ estados=$(echo "${estadosiniciais//[}" | tr -d " " | tr , " "  | awk -F"]" '{pri
 transicoes=$(echo "${estadosiniciais//[}" | tr -d " " | tr , " " | awk -F"]" '{print $2}')
 
 estados=(${estados})
-for i in ${!estados[@]}; do
-  grafo=$(echo $grafo | sed "s:${estados[$i]}:$i:g")
-  initials=$(echo $initials | sed "s:${estados[$i]}:$i:g")
-  finals=$(echo $finals | sed "s:${estados[$i]}:$i:g")
-  estados[$i]=$i
-done
-
 finals=(${finals})
 initials=(${initials})
 transicoes=(${transicoes})
@@ -45,9 +38,24 @@ for i in ${!estados[@]}; do
 done
 remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
 for (( i = ${#grafo[@]}; i >= $remover; i-- )); do
-    grafo[$i]=''
+    unset grafo[$i]
 done
-for (( i = 0; i < $remover; i+=3 )); do
+for j in ${!estados[@]}; do
+ for (( i=0; i<${#finals[@]}; i++ )); do
+   [[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; }
+ done
+ for (( i=0; i<${#initials[@]}; i++ )); do
+   [[ ${initials[$i]} == ${estados[$j]} ]] && { initials[$i]=$j; }
+ done
+ for (( i=0; i < ${#grafo[@]}; i+=3 )); do
+   [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; }
+ done
+ for (( i=2; i < ${#grafo[@]}; i+=3 )); do
+   [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; }
+ done
+ estados[$j]=$j
+done
+for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
 
