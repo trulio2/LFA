@@ -88,7 +88,7 @@ verificar(){
 
 while true; do
  read teste
- [[ $teste == '' ]] && { exit 0; }
+ [[ -z $teste ]] && { exit 0; }
  teste=$(echo ${teste} | grep -o .)
  teste=(${teste})
  for init in ${initials[@]}; do
