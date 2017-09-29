@@ -1,9 +1,9 @@
 #!/bin/bash
 checkfinal()
 {
-echo $n
+ echo "${atual[$1]} -> $1 "
  for (( k = 0; k < ${#finals[@]}; k++ )); do
-  if [[ ${atual[$pos]} == ${finals[$k]} ]]; then
+  if [[ ${atual[$1]} == ${finals[$k]} ]]; then
     check="Sim"
    break
   fi
@@ -13,35 +13,14 @@ echo $n
  fi
 }
 
-mover()
-{
- for (( ; n < ${#grafo[@]}; n+=3  )); do
-  if [[ ${atual[$pos]} -eq ${grafo[$n]} && (${teste[$j]} == ${grafo[$n+1]} || ${grafo[$n+1]} == '#') ]]; then
-    if [[ ${grafo[$n+1]} == '#' ]]; then
-	let j--
-    fi
-echo -n "${atual[$pos]} -> "
-      let pos++
-       atual[$pos]=${grafo[$n+2]}
-echo  "${atual[$pos]}"
-
-       break
-  fi
- done
-  if [[ $n -ge ${#grafo[@]} ]]; then
-   let cont++
-   let pos-=cont
-   let n-=cont*3
-  fi
-
-}
 
 if [[ $# == 0  ]]; then
-	echo "Usar: $0 [AFNλ]"
+	echo "Usar: $0 [AFNλ]" 1>&2
 	exit 1
 fi
+
 mudaestado=0
-i=0
+
 for arq in $(cat $1); do
  arq=$(echo $arq  | sed "s:\"::g" | sed "s:\}::g" | sed "s:\,::g")
  if [[ $mudaestado > 0 ]]; then
@@ -62,9 +41,7 @@ for arq in $(cat $1); do
 done
 initials=$(echo "$estado" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $1}')
 finals=$(echo "$estado" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $2}')
-
 estados=$(echo "$estadosiniciais" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $1}')
-
 transicoes=$(echo "$estadosiniciais" | sed "s:\[::g" | sed "s:\ ::g" | sed "s:,: :g" | awk -F"]" '{print $2}')
 
 estados=(${estados})
@@ -80,6 +57,7 @@ finals=(${finals})
 initials=(${initials})
 transicoes=(${transicoes})
 grafo=(${grafo})
+
 declare -A matriz
 for (( i=0; i<${#estados[@]}; i++  )); do
    for (( j=0; j<${#estados[@]}; j++ )); do
@@ -96,50 +74,42 @@ for (( i = 0; i < $remover; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=${grafo[$i+1]}
 done
 
-for (( i=0; i<${#estados[@]}; i++  )); do
-   for (( j=0; j<${#estados[@]}; j++ )); do
-     echo -n "${matriz[$i,$j]} "
-   done
- echo
-done
+verificar(){
+ if [[ $3 -ge ${#teste[@]} ]]; then
+   let final=$3+1
+   checkfinal $final
+   echo ${atual[@]}
+ else
+  for (( i=0; i < ${#estados[@]}; i++ )); do
+    if [[ ${matriz[$2,$i]} == ${teste[$3]} || ${matriz[$2,$i]} == '#' ]]; then
+      atual[$1]=$i
+      let inseridos=$1+1
+      let test=$3+1
+      if [[ ${matriz[$2,$i]} == '#' ]]; then
+       let test--
+      fi
+      verificar $inseridos $i $test
+    fi
+  done
+ fi
+}
 
 
 while true; do
  read teste
  teste=$(echo ${teste} | grep -o .)
  teste=(${teste})
- cont=1
- sub=$(echo "${#teste[@]} - 1" | bc -l)
+
  for init in ${initials[@]}; do
-  check="Nao"
-  pos=0
-  n=0
-  atual[$pos]=${initials[$init]}
-  for (( j = 0; j < ${#teste[@]}; j++ )); do
-   mover
-   for (( i = 0; i < ${#transicoes[@]}; i++ )); do
-     if [[ ${teste[$j]} == ${transicoes[$i]} ]]; then
+   inseridos=1
+   test=0
+   check="Nao"
+   atual[0]=${initials[$init]}
+   verificar $inseridos ${atual[0]} $test
+   if [[ $check == "Sim" ]]; then
       break
-     fi
-   done
-   if [[ $i == ${#transicoes[@]} ]]; then
-    echo "Não"
-    break
    fi
-    if  [[ $j -eq $sub ]]; then
-     checkfinal
-     if [[ $check == "Sim" ]]; then
-      break
-     fi
-     let n+=cont*3
-     let j-=cont
-      if [[ $j -lt 0 ]]; then
-      let j=-1
-     fi
-     let cont--
-    fi
-  done
  done
- echo $check
+  echo $check
 done
 
