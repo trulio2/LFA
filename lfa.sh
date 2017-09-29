@@ -73,7 +73,7 @@ done
 
 verificar(){
  if [[ $3 -ge ${#teste[@]} ]]; then
-   let final=$3+1
+   let final=$1-1
    checkfinal $final
  else
   if [[ $check == "Nao" ]]; then
@@ -107,7 +107,6 @@ while true; do
    atual[0]=${initials[$init]}
    verificar $inseridos ${atual[0]} $test
    if [[ $check == "Sim" ]]; then
-      echo ${atual[@]}
       break
    fi
  done
