@@ -52,19 +52,21 @@ for (( i = 0; i < $remover; i+=3 )); do
 done
 
 checkfinal(){
- for (( k = 0; k < ${#finals[@]}; k++ )); do
+ local k=0
+ for k in ${!finals[@]}; do
   [[ ${atual[$1]} == ${finals[$k]} ]] && { check="Sim"; break; }
  done
  [[ $k -eq ${#finals[@]} ]] && { check="Nao"; }
 }
 
 verificar(){
- if [[ $3 -ge ${#teste[@]} ]]; then
-   let final=$1-1
+ local final=$1
+ let final--
+ if [[ $3 -ge ${#teste[@]} && $check == "Nao" ]]; then
    checkfinal $final
  else
   if [[ $check == "Nao" ]]; then
-   [[ ${teste[$3]} == '#' ]] && { let hash=$1-1; checkfinal $hash; }
+   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; }
    local i=0
    for i in ${!estados[@]}; do
      local conf=0
