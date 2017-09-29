@@ -48,7 +48,7 @@ grafo=(${grafo})
 declare -A matriz
 for i in ${!estados[@]}; do
    for j in ${!estados[@]}; do
-      matriz["$i","$j"]=""
+      matriz[$i,$j]=""
    done
 done
 remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
