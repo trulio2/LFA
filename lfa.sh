@@ -78,6 +78,7 @@ verificar(){
      done
      if [[ $conf -eq 1 ]]; then
        atual[$1]=$i
+       unset atual[$1+1]
        let inseridos=$1+1
        let test=$3+1
        [[ ${matriz[$2,$i]} == '#' ]] && { let test--; }
