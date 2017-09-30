@@ -1,16 +1,20 @@
-
 #!/bin/bash
 verificar(){
  test $1 -ge 1 || {
 	echo "Usar: $0 [OPTION] AFNλ" 1>&2;
+        echo "	-p,--path	Mostra os caminhos testados" ;
+        echo "	-h,--help	Mostra esta mensagem";
 	exit 1;
  }
 }
 show=off
 case $1 in
-  -n|--check) show=on; shift ;;
+  -p|--path) show=on; shift ;;
+  -h|--help) verificar 0 ;;
+  -?*|-) echo "Opção desconhecida"; verificar 0 ;;
 esac
 verificar $#
+test -f $1 || { echo "$1 não é um arquivo regular"; exit 2; }
 
 mudaestado=0
 for arq in $(cat $1); do
@@ -70,7 +74,7 @@ checkfinal(){
  [[ $k -eq ${#finals[@]} ]] && { check="Nao"; }
 }
 
-showfinal(){
+showpath(){
  local i
  for i in ${atual[@]}; do
   echo -n "${estados[$i]} "
@@ -83,10 +87,10 @@ verificar(){
  let final--
  if [[ $3 -ge ${#teste[@]} && $check == "Nao" ]]; then
    checkfinal $final
-   test $show = on && showfinal
+   test $show = on && showpath
  else
   if [[ $check == "Nao" ]]; then
-   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $show = on && showfinal;  }
+   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $show = on && showpath;  }
    local i=0
    for i in ${!estados[@]}; do
      local conf=0
