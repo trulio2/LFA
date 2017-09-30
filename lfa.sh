@@ -1,9 +1,13 @@
 
 #!/bin/bash
-if [[ $# -ne 1  ]]; then
-	echo "Usar: $0 [AFNλ]" 1>&2
-	exit 1
-fi
+test $# -ge 1 || {
+	echo "Usar: $0 [AFNλ]" 1>&2;
+	exit 1;
+}
+show=off
+case $1 in
+  -n|--check) show=on; shift ;;
+esac
 
 mudaestado=0
 for arq in $(cat $1); do
@@ -49,7 +53,6 @@ for j in ${!estados[@]}; do
  for (( i=2; i < ${#grafo[@]}; i+=3 )); do
    [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; }
  done
- estados[$j]=$j
 done
 
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
@@ -64,14 +67,23 @@ checkfinal(){
  [[ $k -eq ${#finals[@]} ]] && { check="Nao"; }
 }
 
+showfinal(){
+ local i
+ for i in ${atual[@]}; do
+  echo -n "${estados[$i]} "
+ done
+ echo
+}
+
 verificar(){
  local final=$1
  let final--
  if [[ $3 -ge ${#teste[@]} && $check == "Nao" ]]; then
    checkfinal $final
+   test $show = on && showfinal
  else
   if [[ $check == "Nao" ]]; then
-   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; }
+   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $show = on && showfinal;  }
    local i=0
    for i in ${!estados[@]}; do
      local conf=0
