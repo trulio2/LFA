@@ -53,24 +53,29 @@ remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
 for (( i = ${#grafo[@]}; i >= $remover; i-- )); do
     unset grafo[$i]
 done
-for j in ${!estados[@]}; do
- for i in  ${!finals[@]}; do
-   [[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; }
- done
- for i in ${!initials[@]}; do
-   [[ ${initials[$i]} == ${estados[$j]} ]] && { initials[$i]=$j; }
- done
- for (( i=0; i < ${#grafo[@]}; i+=3 )); do
-   [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; }
- done
- for (( i=2; i < ${#grafo[@]}; i+=3 )); do
-   [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; }
- done
+for i in  ${!finals[@]}; do
+   for j in ${!estados[@]}; do
+      [[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; break; }
+   done
+done
+for i in ${!initials[@]}; do
+   for j in ${!estados[@]}; do
+      [[ ${initials[$i]} == ${estados[$j]} ]] && { initials[$i]=$j; break; }
+   done
+done
+for (( i=0; i < ${#grafo[@]}; i+=3 )); do
+  for j in ${!estados[@]}; do
+      [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; break; }
+  done
+done
+for (( i=2; i < ${#grafo[@]}; i+=3 )); do
+  for j in ${!estados[@]}; do
+      [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; break; }
+  done
 done
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
-
 checkfinal(){
  local k=0
  for k in ${!finals[@]}; do
