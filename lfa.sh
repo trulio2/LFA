@@ -1,20 +1,21 @@
 #!/bin/bash
 verificar(){
- test $1 -ge 1 || {
+ test $1 -eq 1 || {
 	echo "Usar: $0 [OPTION] AFNλ" 1>&2;
         echo "	-p,--path	Mostra os caminhos testados" ;
         echo "	-h,--help	Mostra esta mensagem";
-	exit 1;
- }
+	exit 1; }
 }
 show=off
-case $1 in
-  -p|--path) show=on; shift ;;
-  -h|--help) verificar 0 ;;
-  -?*|-) echo "Opção desconhecida"; verificar 0 ;;
-esac
+for i in $@; do
+ case $i in
+   -p|--path) show=on; shift ;;
+   -h|--help) verificar 0 ;;
+   -?*|-) echo "Opção desconhecida" 1>$2; verificar 0 ;;
+ esac
+done
 verificar $#
-test -f $1 || { echo "$1 não é um arquivo regular"; exit 2; }
+test -f $1 || { echo "$1 não é um arquivo regular" 1>$2; exit 2; }
 
 mudaestado=0
 for arq in $(cat $1); do
