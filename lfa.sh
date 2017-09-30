@@ -6,19 +6,24 @@ verificar(){
         echo "	-h,--help	Mostra esta mensagem";
 	exit 1; }
 }
+args=
 show=off
-for i in $@; do
- case $i in
-   -p|--path) show=on; shift ;;
-   -h|--help) verificar 0 ;;
-   -?*|-) echo "Opção desconhecida" 1>$2; verificar 0 ;;
- esac
+while [ $# != 0 ]; do
+    case $1 in
+    -h|--help) verificar 0 ;;
+    -p|--path) show=on ;;
+    --) shift; while [ $# != 0 ]; do args="$args $1"; shift; done; break ;;
+    -?*) echo "Opção Desconhecida: $1" 1>&2; verificar 0 ;;
+    *) args="$args $1" ;;
+    esac
+    shift
 done
-verificar $#
-test -f $1 || { echo "$1 não é um arquivo regular" 1>$2; exit 2; }
+args=($args)
+verificar ${#args[@]}
+test -f $args || { echo "$1 não é um arquivo regular" 1>&2; exit 2; }
 
 mudaestado=0
-for arq in $(cat $1); do
+for arq in $(cat $args); do
  arq=$(echo $arq  | tr -d \"},)
  [[ $mudaestado > 0 ]] && { est=$(echo "$est,$arq"); }
  if [[ $arq == '[' || $arq == ']' ]]; then
@@ -72,7 +77,6 @@ checkfinal(){
  for k in ${!finals[@]}; do
   [[ ${atual[$1]} == ${finals[$k]} ]] && { check="Sim"; break; }
  done
- [[ $k -eq ${#finals[@]} ]] && { check="Nao"; }
 }
 
 showpath(){
@@ -122,8 +126,8 @@ while true; do
  for init in ${initials[@]}; do
    check="Nao"
    b=0; u=0
-   for u in ${!teste[@]}; do
-    [[ ${teste[$u]} == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
+   for u in ${teste[@]}; do
+    [[ $u == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
    done
    [[ $b == 1 ]] && { break; }
    for n in ${!atual[@]}; do
