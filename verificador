@@ -1,7 +1,7 @@
 #!/bin/bash
 verificar(){
  test $1 -eq 1 || {
-	echo "Usar: $0 [OPTION] AFNλ" 1>&2;
+	echo "Usar: ${0//.\//} [OPTION] AFNλ" 1>&2;
         echo "	-p,--path	Mostra os caminhos testados" ;
         echo "	-h,--help	Mostra esta mensagem";
 	exit 1; }
@@ -19,7 +19,8 @@ while [ $# != 0 ]; do
 done
 args=($args)
 verificar ${#args[@]}
-test -f $args || { echo "$args não é um arquivo regular" 1>&2; exit 2; }
+test -e ${args} || { echo "$args não existe" 1>&2; exit 2; }
+test -f $args || { echo "$args não é um arquivo regular" 1>&2; exit 3; }
 
 mudaestado=0
 for arq in $(cat $args); do
