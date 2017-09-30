@@ -67,7 +67,6 @@ for j in ${!estados[@]}; do
    [[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; }
  done
 done
-
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
@@ -117,7 +116,6 @@ verificar(){
   fi
  fi
 }
-
 while true; do
  read teste
  [[ -z $teste ]] && { exit 0; }
@@ -135,7 +133,7 @@ while true; do
    done
    inseridos=1
    test=0
-   atual[0]=${initials[$init]}
+   atual[0]=$init
    verificar $inseridos ${atual[0]} $test
    [[ $check == "Sim" ]] && {  break; }
  done
