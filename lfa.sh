@@ -20,7 +20,7 @@ while [ $# != 0 ]; do
 done
 args=($args)
 verificar ${#args[@]}
-test -f $args || { echo "$1 não é um arquivo regular" 1>&2; exit 2; }
+test -f $args || { echo "$args não é um arquivo regular" 1>&2; exit 2; }
 
 mudaestado=0
 for arq in $(cat $args); do
