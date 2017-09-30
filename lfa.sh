@@ -128,7 +128,13 @@ while true; do
  teste=(${teste})
  for init in ${initials[@]}; do
    check="Nao"
-   b=0; u=0
+   b=0
+   for i in ${!teste[@]}; do
+    for (( j = 0; j < ${#transicoes[@]}; j++ )); do
+      [[ ${teste[$i]} == ${transicoes[$j]} || ${teste[$i]} == '#' ]]  &&  break
+    done
+    test  $j = ${#transicoes[@]} && { b=1; break; }
+   done
    for u in ${teste[@]}; do
     [[ $u == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
    done
