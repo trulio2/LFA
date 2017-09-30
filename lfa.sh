@@ -12,8 +12,7 @@ while [ $# != 0 ]; do
     case $1 in
     -h|--help) verificar 0 ;;
     -p|--path) show=on ;;
-    --) shift; while [ $# != 0 ]; do args="$args $1"; shift; done; break ;;
-    -?*) echo "Opção Desconhecida: $1" 1>&2; verificar 0 ;;
+    -?*|-*) echo "Opção Desconhecida: $1" 1>&2; verificar 0 ;;
     *) args="$args $1" ;;
     esac
     shift
@@ -138,7 +137,7 @@ while true; do
    for u in ${teste[@]}; do
     [[ $u == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
    done
-   [[ $b == 1 ]] && { break; }
+   test  $b = 1  && break
    for n in ${!atual[@]}; do
     unset atual[$n]
    done
