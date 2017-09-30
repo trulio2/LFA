@@ -1,13 +1,16 @@
 
 #!/bin/bash
-test $# -ge 1 || {
-	echo "Usar: $0 [AFNλ]" 1>&2;
+verificar(){
+ test $1 -ge 1 || {
+	echo "Usar: $0 [OPTION] AFNλ" 1>&2;
 	exit 1;
+ }
 }
 show=off
 case $1 in
   -n|--check) show=on; shift ;;
 esac
+verificar $#
 
 mudaestado=0
 for arq in $(cat $1); do
