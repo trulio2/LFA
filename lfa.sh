@@ -1,3 +1,4 @@
+
 #!/bin/bash
 if [[ $# -ne 1  ]]; then
 	echo "Usar: $0 [AFNλ]" 1>&2
@@ -31,20 +32,15 @@ transicoes=(${transicoes})
 grafo=(${grafo})
 
 declare -A matriz
-for i in ${!estados[@]}; do
-   for j in ${!estados[@]}; do
-      matriz[$i,$j]=""
-   done
-done
 remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
 for (( i = ${#grafo[@]}; i >= $remover; i-- )); do
     unset grafo[$i]
 done
 for j in ${!estados[@]}; do
- for (( i=0; i<${#finals[@]}; i++ )); do
+ for i in  ${!finals[@]}; do
    [[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; }
  done
- for (( i=0; i<${#initials[@]}; i++ )); do
+ for i in ${!initials[@]}; do
    [[ ${initials[$i]} == ${estados[$j]} ]] && { initials[$i]=$j; }
  done
  for (( i=0; i < ${#grafo[@]}; i+=3 )); do
@@ -55,6 +51,7 @@ for j in ${!estados[@]}; do
  done
  estados[$j]=$j
 done
+
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
