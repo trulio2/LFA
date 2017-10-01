@@ -3,16 +3,22 @@ verificar(){
  test $1 -eq 1 || {
         [[ -z $2 ]] || { echo "$2" 1>&2; }
 	echo "Usar: ${0/.\/} [OPTION] AFNλ" 1>&2
-        echo "	-p,--path	Mostra os caminhos testados"
-        echo "	-h,--help	Mostra esta mensagem"
+        echo "	-p,--path       Mostra os caminhos testados"
+	echo "	-i,--info       Mostra informações sobre o AFNλ"
+	echo "	-m,--matrix     Mostra matriz de conexões entre os estados"
+        echo "	-h,--help       Mostra esta mensagem"
 	exit 1; }
 }
 args=
-show=off
+showpath=off
+showinfo=off
+showmatrix=0ff
 while [ $# != 0 ]; do
     case $1 in
     -h|--help) verificar 0 ;;
-    -p|--path) show=on ;;
+    -p|--path) showpath=on ;;
+    -i|--info) showinfo=on ;;
+    -m|--matrix) showmatrix=on ;;
     -?*|-*) verificar 0 "Opção Desconhecida: $1" ;;
     *) args="$args $1" ;;
     esac
@@ -21,7 +27,7 @@ done
 args=($args)
 verificar ${#args[@]}
 test -e ${args} || { verificar 0 "O arquivo \"$args\" não existe";  }
-test -f $args || { verificar 0 "$args não é um arquivo regular" ; }
+test -f ${args} || { verificar 0 "$args não é um arquivo regular" ; }
 
 mudaestado=0
 for arq in $(cat $args); do
@@ -48,6 +54,12 @@ finals=(${finals})
 initials=(${initials})
 transicoes=(${transicoes})
 grafo=(${grafo})
+test $showinfo = on && {
+            echo "Estados: ${estados[@]}";
+            echo "Estados Iniciais: ${initials[@]}"
+	    echo "Estados Finais: ${finals[@]}"
+            echo "Transições: ${transicoes[@]}"
+ }
 
 declare -A matriz
 remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
@@ -77,7 +89,22 @@ done
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
-
+matrix() {
+ printf "%$((${#estados[@]}+1))s" ''
+ for i in ${!estados[@]}; do
+   printf "%6s" ${estados[$i]}
+ done
+ echo
+ for i in ${!estados[@]}; do
+  printf "%$((${#estados[@]}+1))s" ${estados[$i]}
+  for j in ${!estados[@]}; do
+   [[ -z ${matriz[$i,$j]} ]] && matriz[$i,$j]='-'
+     printf "%6s" "${matriz[$i,$j]}"
+  done
+  echo
+ done
+}
+test $showmatrix = on && matrix
 checkfinal(){
  local k=0
  for k in ${!finals[@]}; do
@@ -98,10 +125,10 @@ verificar(){
  let final--
  if [[ $3 -ge ${#teste[@]} && $check == "Nao" ]]; then
    checkfinal $final
-   test $show = on && showpath
+   test $showpath = on && showpath
  else
   if [[ $check == "Nao" ]]; then
-   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $show = on && showpath;  }
+   [[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $showpath = on && showpath;  }
    local i=0
    for i in ${!estados[@]}; do
      local conf=0
