@@ -89,6 +89,7 @@ done
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
+
 matrix() {
  printf "%$((${#estados[@]}+1))s" ''
  for i in ${!estados[@]}; do
@@ -105,6 +106,7 @@ matrix() {
  done
 }
 test $showmatrix = on && matrix
+
 checkfinal(){
  local k=0
  for k in ${!finals[@]}; do
