@@ -15,12 +15,22 @@ showinfo=off
 showmatrix=0ff
 while [ $# != 0 ]; do
     case $1 in
-    -h|--help) verificar 0 ;;
-    -p|--path) showpath=on ;;
-    -i|--info) showinfo=on ;;
-    -m|--matrix) showmatrix=on ;;
-    -?*|-*) verificar 0 "Opção Desconhecida: $1" ;;
-    *) args="$args $1" ;;
+      --help) verificar 0 ;;
+      --path) showpath=on ;;
+      --info) showinfo=on ;;
+      --matrix) showmatrix=on ;;
+      -?*|-*) {
+           opt=($(echo "$1" | fold -w1))
+           for (( i = 1; i < ${#opt[@]}; i++ )); do
+                  case ${opt[$i]} in
+	            p) showpath=on ;;
+		    h) verificar 0 ;;
+		    i) showinfo=on ;;
+		    m) showmatrix=on ;;
+                    *) verificar 0 "Opção Desconhecida: -${opt[$i]}" ;;
+		  esac
+          done; } ;;
+      *) args="$args $1" ;;
     esac
     shift
 done
