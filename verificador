@@ -19,8 +19,10 @@ while [ $# != 0 ]; do
       --path) showpath=on ;;
       --info) showinfo=on ;;
       --matrix) showmatrix=on ;;
+      --?*) verificar 0 "Opção Desconhecida: $1" ;;
       -?*|-*) {
            opt=($(echo "$1" | fold -w1))
+           [[ -z ${opt[1]} ]] && opt[1]=''
            for (( i = 1; i < ${#opt[@]}; i++ )); do
                   case ${opt[$i]} in
 	            p) showpath=on ;;
@@ -163,6 +165,7 @@ verificar(){
  fi
 }
 while true; do
+ echo -n "> "
  read teste
  [[ -z $teste ]] && { exit 0; }
  teste=$(echo ${teste} | grep -o .)
