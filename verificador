@@ -1,9 +1,10 @@
 #!/bin/bash
 verificar(){
  test $1 -eq 1 || {
-	echo "Usar: ${0/.\/} [OPTION] AFNλ" 1>&2;
-        echo "	-p,--path	Mostra os caminhos testados" ;
-        echo "	-h,--help	Mostra esta mensagem";
+        [[ -z $2 ]] || { echo "$2" 1>&2; }
+	echo "Usar: ${0/.\/} [OPTION] AFNλ" 1>&2
+        echo "	-p,--path	Mostra os caminhos testados"
+        echo "	-h,--help	Mostra esta mensagem"
 	exit 1; }
 }
 args=
@@ -12,15 +13,15 @@ while [ $# != 0 ]; do
     case $1 in
     -h|--help) verificar 0 ;;
     -p|--path) show=on ;;
-    -?*|-*) echo "Opção Desconhecida: $1" 1>&2; verificar 0 ;;
+    -?*|-*) verificar 0 "Opção Desconhecida: $1" ;;
     *) args="$args $1" ;;
     esac
     shift
 done
 args=($args)
 verificar ${#args[@]}
-test -e ${args} || { echo "O arquivo \"$args\" não existe" 1>&2; exit 2; }
-test -f $args || { echo "$args não é um arquivo regular" 1>&2; exit 3; }
+test -e ${args} || { verificar 0 "O arquivo \"$args\" não existe";  }
+test -f $args || { verificar 0 "$args não é um arquivo regular" ; }
 
 mudaestado=0
 for arq in $(cat $args); do
@@ -76,6 +77,7 @@ done
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
   matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
 done
+
 checkfinal(){
  local k=0
  for k in ${!finals[@]}; do
