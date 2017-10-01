@@ -2,7 +2,7 @@
 verificar(){
  test $1 -eq 1 || {
         [[ -z $2 ]] || { echo "$2" 1>&2; }
-	echo "Usar: ${0/.\/} [OPTION] AFNλ" 1>&2
+	echo "Usar: ${0/.\/} [OPTION]... AFNλ" 1>&2
         echo "	-p,--path       Mostra os caminhos testados"
 	echo "	-i,--info       Mostra informações sobre o AFNλ"
 	echo "	-m,--matrix     Mostra matriz de conexões entre os estados"
@@ -165,7 +165,6 @@ verificar(){
  fi
 }
 while true; do
- echo -n "> "
  read teste
  [[ -z $teste ]] && { exit 0; }
  teste=$(echo ${teste} | grep -o .)
