@@ -111,8 +111,11 @@ matrix() {
  for i in ${!estados[@]}; do
   printf "%$((${#estados[@]}+1))s" ${estados[$i]}
   for j in ${!estados[@]}; do
-   [[ -z ${matriz[$i,$j]} ]] && matriz[$i,$j]='-'
+   if [[ -z ${matriz[$i,$j]} ]]; then
+     printf "%6s" "-"
+   else
      printf "%6s" "${matriz[$i,$j]}"
+   fi
   done
   echo
  done
