@@ -44,7 +44,7 @@ ifss=$IFS
 IFS='['
 j=0
 for i in $(cat $args); do
-	linha[$j]=$( echo "$i" | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " "| tr , " " )
+	linha[$j]=$( echo "$i" | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " " | tr , " " )
 	let j++
 done
 estados=${linha[2]}
