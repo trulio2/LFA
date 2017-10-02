@@ -70,6 +70,7 @@ test $showinfo = on && {
             echo "Estados Iniciais: ${initials[@]}"
 	    echo "Estados Finais: ${finals[@]}"
             echo "Transições: ${transicoes[@]}"
+	    echo
  }
 
 declare -A matriz
@@ -118,6 +119,7 @@ matrix() {
 		done
 		echo
 	done
+	echo
 }
 test $showmatrix = on && matrix
 
@@ -133,7 +135,7 @@ showpath(){
 	for i in ${atual[@]}; do
 		echo -n "${estados[$i]} "
 	done
-	echo
+	 echo " =>  $check"
 }
 
 verificar(){
