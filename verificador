@@ -21,14 +21,14 @@ while [ $# != 0 ]; do
       --matrix) showmatrix=on ;;
       --?*) usage 0 "Opção Desconhecida: $1" ;;
       -?*) {
-           opt=($(echo "$1" | fold -w1))
-           for (( i = 1; i < ${#opt[@]}; i++ )); do
-                  case ${opt[$i]} in
+           opt=($(echo "${1/-}" | fold -w1))
+           for i in ${opt[@]}; do
+                  case $i in
 	            p) showpath=on ;;
 		    h) usage 0 ;;
 		    i) showinfo=on ;;
 		    m) showmatrix=on ;;
-                    *) usage 0 "Opção Desconhecida: -${opt[$i]}" ;;
+                    *) usage 0 "Opção Desconhecida: -$i" ;;
 		  esac
           done; } ;;
       *) args="$args $1" ;;
