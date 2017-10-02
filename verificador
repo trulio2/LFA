@@ -37,36 +37,33 @@ while [ $# != 0 ]; do
 done
 args=($args)
 usage ${#args[@]}
-test -e ${args} || { usage 0 "O arquivo \"$args\" não existe";  }
-test -f ${args} || { usage 0 "$args não é um arquivo regular" ; }
+test -e ${args} || usage 0 "O arquivo \"$args\" não existe"
+test -f ${args} || usage 0 "$args não é um arquivo regular"
 
-mudaestado=0
-for arq in $(cat $args); do
-	arq=$(echo $arq  | tr -d \"},)
-	[[ $mudaestado > 0 ]] && { est=$(echo "$est,$arq"); }
-	if [[ $arq == '[' || $arq == ']' ]]; then
-		estado=$(echo "$est")
-		if [[ $mudaestado == 1 ]]; then
-			estadosiniciais=$estado
-		else
-			grafo=$(echo $grafo$estado | tr , " " |tr -d [])
-		fi
-		est=''
-		let mudaestado++
-	fi
+ifss=$IFS
+IFS='['
+j=0
+for i in $(cat $args); do
+	linha[$j]=$( echo "$i" | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " "| tr , " " )
+	let j++
 done
-initials=$(echo "${estado//[}" | tr -d " " | tr , " "| awk -F"]" '{print $1}')
-finals=$(echo "${estado//[}" | tr -d " " |tr , " "  | awk -F"]" '{print $2}')
-estados=$(echo "${estadosiniciais//[}" | tr -d " " | tr , " "  | awk -F"]" '{print $1}')
-transicoes=$(echo "${estadosiniciais//[}" | tr -d " " | tr , " " | awk -F"]" '{print $2}')
-
-estados=(${estados})
-finals=(${finals})
-initials=(${initials})
-transicoes=(${transicoes})
+estados=${linha[2]}
+transicoes=${linha[3]}
+finals=${linha[${#linha[@]}-1]}
+initials=${linha[${#linha[@]}-2]}
+for (( i = 4; i < ${#linha[@]} - 2; i++ )); do
+	grafo="$grafo${linha[$i]}"
+done
+IFS=$ifss
 grafo=(${grafo})
+grafo[${#grafo[@]}-1]="${grafo[${#grafo[@]}-1]}" | head -n 1
+estados=($estados)
+finals=($finals)
+initials=($initials)
+transicoes=($transicoes)
+
 test $showinfo = on && {
-            echo "Estados: ${estados[@]}";
+            echo "Estados: ${estados[@]}"
             echo "Estados Iniciais: ${initials[@]}"
 	    echo "Estados Finais: ${finals[@]}"
             echo "Transições: ${transicoes[@]}"
@@ -74,10 +71,6 @@ test $showinfo = on && {
  }
 
 declare -A matriz
-remover=$(echo "${#grafo[@]} - ${#finals[@]} - ${#initials[@]}" | bc -l)
-for (( i = ${#grafo[@]}; i >= $remover; i-- )); do
-	unset grafo[$i]
-done
 for i in  ${!finals[@]}; do
 	for j in ${!estados[@]}; do
 		[[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; break; }
@@ -99,7 +92,7 @@ for (( i=2; i < ${#grafo[@]}; i+=3 )); do
 	done
 done
 for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
-	matriz[${grafo[$i]},${grafo[$i+2]}]=$(echo "${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}")
+	matriz[${grafo[$i]},${grafo[$i+2]}]="${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}"
 done
 
 matrix() {
@@ -160,7 +153,7 @@ verificar(){
 				unset atual[$1+1]
 				let inseridos=$1+1
 				let test=$3+1
-				[[ ${matriz[$2,$i]} == '#' ]] && { let test--; }
+				[[ ${matriz[$2,$i]} == '#' ]] && let test--
 				verificar $inseridos $i $test
 			fi
 			done
@@ -170,7 +163,7 @@ verificar(){
 while true; do
 	read teste
 	[[ -z $teste ]] && { exit 0; }
-	teste=($(echo ${teste} | grep -o .))
+	teste=($(echo "${teste}" | grep -o .))
 	for init in ${initials[@]}; do
 		check="Nao"
 		b=0
@@ -183,7 +176,7 @@ while true; do
 		for u in ${teste[@]}; do
 			[[ $u == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
 		done
-		test  $b = 1  && break
+		test  $b = 1  &&  break
 		for n in ${!atual[@]}; do
 			unset atual[$n]
 		done
@@ -191,7 +184,7 @@ while true; do
 		test=0
 		atual[0]=$init
 		verificar $inseridos ${atual[0]} $test
-		[[ $check == "Sim" ]] && {  break; }
+		[[ $check == "Sim" ]] && break
 	done
 	echo $check
 done
