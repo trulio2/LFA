@@ -94,6 +94,7 @@ inicio(){
 		initials=($initials)
 		transicoes=($transicoes)
 		test $showinfo = on && {
+			    test $mult && echo $n
 		            echo "Estados: ${estados[@]}"
 		            echo "Estados Iniciais: ${initials[@]}"
 			    echo "Estados Finais: ${finals[@]}"
