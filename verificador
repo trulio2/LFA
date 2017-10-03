@@ -128,7 +128,7 @@ inicio(){
 		test $showmatrix = on && matrix
 	done
 }
-inicio ${args[@]}
+[[ $showinfo == "on" || $showmatrix == "on" ]] && inicio ${args[@]}
 checkfinal(){
 	local k=0
 	for k in ${finals[@]}; do
