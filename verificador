@@ -93,8 +93,8 @@ inicio(){
 		finals=($finals)
 		initials=($initials)
 		transicoes=($transicoes)
+		[[ $showinfo == "on" || $showmatrix == "on" ]] &&  echo "\"$n\""
 		test $showinfo = on && {
-			    test $mult && echo $n
 		            echo "Estados: ${estados[@]}"
 		            echo "Estados Iniciais: ${initials[@]}"
 			    echo "Estados Finais: ${finals[@]}"
