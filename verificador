@@ -23,6 +23,7 @@ while [ $# != 0 ]; do
       --info) showinfo=on ;;
       --matrix) showmatrix=on ;;
       --multiple) mult=on ;;
+      --all) mult=on; showinfo=on; showpath=on; showmatrix=on;;
       --?*) usage 0 "Opção Desconhecida: $1" ;;
       -?*) {
            opt=($(echo "${1/-}" | fold -w1))
