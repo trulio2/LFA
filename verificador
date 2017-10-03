@@ -6,19 +6,23 @@ usage(){
         echo "	-p,--path       Mostra os caminhos testados"
 	echo "	-i,--info       Mostra informações sobre o AFNλ"
 	echo "	-m,--matrix     Mostra matriz de conexões entre os estados"
+	echo "	-x,--multiple   Permite teste de multiplos arquivos"
+	echo "	-a,--all        Equivalente a -pimx"
         echo "	-h,--help       Mostra esta mensagem"
 	exit 1; }
 }
 args=
 showpath=off
 showinfo=off
-showmatrix=0ff
+showmatrix=off
+mult=off
 while [ $# != 0 ]; do
     case $1 in
       --help) usage 0 ;;
       --path) showpath=on ;;
       --info) showinfo=on ;;
       --matrix) showmatrix=on ;;
+      --multiple) mult=on ;;
       --?*) usage 0 "Opção Desconhecida: $1" ;;
       -?*) {
            opt=($(echo "${1/-}" | fold -w1))
@@ -28,6 +32,8 @@ while [ $# != 0 ]; do
 		    h) usage 0 ;;
 		    i) showinfo=on ;;
 		    m) showmatrix=on ;;
+		    x) mult=on ;;
+		    a) showpath=on; showinfo=on; showmatrix=on; mult=on ;;
                     *) usage 0 "Opção Desconhecida: -$i" ;;
 		  esac
           done; } ;;
@@ -35,64 +41,11 @@ while [ $# != 0 ]; do
     esac
     shift
 done
-args=($args)
-usage ${#args[@]}
-test -e ${args} || usage 0 "O arquivo \"$args\" não existe"
-test -f ${args} || usage 0 "$args não é um arquivo regular"
-
-ifss=$IFS
-IFS='['
-j=0
-for i in $(cat $args); do
-	linha[$j]=$( echo "$i" | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " " | tr , " " )
-	let j++
-done
-estados=${linha[2]}
-transicoes=${linha[3]}
-finals=${linha[${#linha[@]}-1]}
-initials=${linha[${#linha[@]}-2]}
-for (( i = 4; i < ${#linha[@]} - 2; i++ )); do
-	grafo="$grafo${linha[$i]}"
-done
-IFS=$ifss
-grafo=(${grafo})
-grafo[${#grafo[@]}-1]="${grafo[${#grafo[@]}-1]}" | head -n 1
-estados=($estados)
-finals=($finals)
-initials=($initials)
-transicoes=($transicoes)
-
-test $showinfo = on && {
-            echo "Estados: ${estados[@]}"
-            echo "Estados Iniciais: ${initials[@]}"
-	    echo "Estados Finais: ${finals[@]}"
-            echo "Transições: ${transicoes[@]}"
-	    echo
- }
-
-declare -A matriz
-for i in  ${!finals[@]}; do
-	for j in ${!estados[@]}; do
-		[[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; break; }
-	done
-done
-for i in ${!initials[@]}; do
-	for j in ${!estados[@]}; do
-		[[ ${initials[$i]} == ${estados[$j]} ]] && { initials[$i]=$j; break; }
-	done
-done
-for (( i=0; i < ${#grafo[@]}; i+=3 )); do
-	for j in ${!estados[@]}; do
-		[[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; break; }
-	done
-done
-for (( i=2; i < ${#grafo[@]}; i+=3 )); do
-	for j in ${!estados[@]}; do
-		[[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; break; }
-	done
-done
-for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
-	matriz[${grafo[$i]},${grafo[$i+2]}]="${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}"
+args=(${args})
+test $mult = on || usage ${#args[@]}
+for i in ${args[@]}; do
+	test -e ${i} || usage 0 "O arquivo \"$i\" não existe"
+	test -f ${i} || usage 0 "\"$i\" não é um arquivo regular"
 done
 
 matrix() {
@@ -114,8 +67,66 @@ matrix() {
 	done
 	echo
 }
-test $showmatrix = on && matrix
 
+inicio(){
+	for n in $@; do
+		ifss=$IFS
+		IFS='['
+		local j=0
+	        unset linha; unset grafo; unset estados; unset finals; unset initials; unset transicoes; unset matriz
+		for i in $(cat $n); do
+			linha[$j]=$( echo "$i" | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " " | tr , " " )
+			let j++
+		done
+		estados=${linha[2]}
+		transicoes=${linha[3]}
+		finals=${linha[${#linha[@]}-1]}
+		initials=${linha[${#linha[@]}-2]}
+		for (( i = 4; i < ${#linha[@]} - 2; i++ )); do
+			grafo="$grafo${linha[$i]}"
+		done
+		IFS=$ifss
+		grafo=(${grafo})
+		grafo[${#grafo[@]}-1]="${grafo[${#grafo[@]}-1]}" | head -n 1
+		estados=($estados)
+		finals=($finals)
+		initials=($initials)
+		transicoes=($transicoes)
+		test $showinfo = on && {
+		            echo "Estados: ${estados[@]}"
+		            echo "Estados Iniciais: ${initials[@]}"
+			    echo "Estados Finais: ${finals[@]}"
+		            echo "Transições: ${transicoes[@]}"
+			    echo
+		}
+		declare -gA matriz
+		for i in  ${!finals[@]}; do
+			for j in ${!estados[@]}; do
+				[[ ${finals[$i]} == ${estados[$j]} ]] && { finals[$i]=$j; break; }
+			done
+		done
+		for i in ${!initials[@]}; do
+			for j in ${!estados[@]}; do
+				[[ ${initials[$i]} == ${estados[$j]} ]] && { initials[$i]=$j; break; }
+			done
+		done
+		for (( i=0; i < ${#grafo[@]}; i+=3 )); do
+			for j in ${!estados[@]}; do
+				[[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; break; }
+			done
+		done
+		for (( i=2; i < ${#grafo[@]}; i+=3 )); do
+			for j in ${!estados[@]}; do
+				[[ ${grafo[$i]} == ${estados[$j]} ]] && { grafo[$i]=$j; break; }
+			done
+		done
+		for (( i = 0; i < ${#grafo[@]}; i+=3 )); do
+			matriz[${grafo[$i]},${grafo[$i+2]}]="${matriz[${grafo[$i]},${grafo[$i+2]}]}${grafo[$i+1]}"
+		done
+		test $showmatrix = on && matrix
+	done
+}
+inicio ${args[@]}
 checkfinal(){
 	local k=0
 	for k in ${finals[@]}; do
@@ -140,7 +151,6 @@ verificar(){
 	else
 		if [[ $check == "Nao" ]]; then
 			[[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $showpath = on && showpath;  }
-			local i=0
 			for i in ${!estados[@]}; do
 				local conf=0
 				valores=($(echo ${matriz[$2,$i]} | fold -w1))
@@ -164,27 +174,30 @@ while true; do
 	read teste
 	[[ -z $teste ]] && { exit 0; }
 	teste=($(echo "${teste}" | grep -o .))
-	for init in ${initials[@]}; do
-		check="Nao"
-		b=0
-		for i in ${teste[@]}; do
-			for (( j = 0; j < ${#transicoes[@]}; j++ )); do
-				[[ $i == ${transicoes[$j]} || $i == '#' ]]  &&  break
+	showmatrix=off; showinfo=off
+	for it in ${args[@]}; do
+		inicio $it
+		for init in ${initials[@]}; do
+			check="Nao"
+			b=0
+			for i in ${teste[@]}; do
+				for (( j = 0; j < ${#transicoes[@]}; j++ )); do
+					[[ $i == ${transicoes[$j]} || $i == '#' ]]  &&  break
+				done
+				test  $j = ${#transicoes[@]} && { b=1; break; }
 			done
-			test  $j = ${#transicoes[@]} && { b=1; break; }
+			for u in ${teste[@]}; do
+				[[ $u == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
+			done
+			test  $b = 1  &&  break
+			unset atual
+			inseridos=1
+			test=0
+			atual[0]=$init
+			verificar $inseridos ${atual[0]} $test
+			[[ $check == "Sim" ]] && break
 		done
-		for u in ${teste[@]}; do
-			[[ $u == '#' && ${#teste[@]} -gt 1 ]] && { b=1 ; break; }
-		done
-		test  $b = 1  &&  break
-		for n in ${!atual[@]}; do
-			unset atual[$n]
-		done
-		inseridos=1
-		test=0
-		atual[0]=$init
-		verificar $inseridos ${atual[0]} $test
-		[[ $check == "Sim" ]] && break
+		test $mult = on && echo -n "$it => "
+		echo $check
 	done
-	echo $check
 done
