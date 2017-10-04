@@ -43,7 +43,7 @@ while [ $# != 0 ]; do
     shift
 done
 args=(${args})
-[[ $mult ==  off || ${#args[@]} -eq 0 ]] &&  usage ${#args[@]}
+[[ $mult ==  off && ${#args[@]} -ne 1 || $mult == on && ${#args[@]} -lt 1 ]] &&  usage ${#args[@]}
 for i in ${args[@]}; do
 	test -e ${i} || usage 0 "O arquivo \"$i\" não existe"
 	test -f ${i} || usage 0 "\"$i\" não é um arquivo regular"
