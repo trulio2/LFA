@@ -177,7 +177,7 @@ while true; do
 	[[ -z $teste ]] && { exit 0; }
 	teste=($(echo "${teste}" | grep -o .))
 	showmatrix=off; showinfo=off
-	test $mult = on && echo ${teste[@]}
+	test $mult = on && { echo;  echo "--  ${teste[@]}  --"; }
 	for it in ${args[@]}; do
 		inicio $it
 		for init in ${initials[@]}; do
