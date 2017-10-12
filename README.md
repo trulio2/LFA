@@ -1,1 +1,1 @@
-Testador de Autômato Finito Não Determinístico com transições λ(AFNλ) em ShellScript(praq)
+Testador de Autômato Finito Não Determinístico com transições λ(AFNλ) em ShellScript
