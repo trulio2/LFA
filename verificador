@@ -150,8 +150,8 @@ verificar(){
 	if [[ $3 -ge ${#teste[@]} && $check == "Nao" ]]; then
 		checkfinal $final
 		test $showpath = on && showpath
-	else
-		if [[ $check == "Nao" ]]; then
+	fi
+	if [[ $check == "Nao" ]]; then
 			[[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $showpath = on && showpath;  }
 			for i in ${!estados[@]}; do
 				local conf=0
@@ -169,7 +169,6 @@ verificar(){
 				verificar $inseridos $i $test
 			fi
 			done
-		fi
 	fi
 }
 while true; do
