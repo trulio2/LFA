@@ -131,7 +131,6 @@ inicio(){
 [[ $showinfo == "on" || $showmatrix == "on" ]] && inicio ${args[@]}
 checkfinal(){
 	local k=0
-	echo ${estados[$1]}
 	for k in ${finals[@]}; do
 		[[ ${atual[$1]} == $k ]] && { check="Sim"; break; }
 	done
