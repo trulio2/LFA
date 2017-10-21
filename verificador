@@ -131,6 +131,7 @@ inicio(){
 [[ $showinfo == "on" || $showmatrix == "on" ]] && inicio ${args[@]}
 checkfinal(){
 	local k=0
+	echo ${estados[$1]}
 	for k in ${finals[@]}; do
 		[[ ${atual[$1]} == $k ]] && { check="Sim"; break; }
 	done
@@ -152,23 +153,35 @@ verificar(){
 		test $showpath = on && showpath
 	fi
 	if [[ $check == "Nao" ]]; then
-			[[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $showpath = on && showpath;  }
-			for i in ${!estados[@]}; do
-				local conf=0
-				valores=($(echo ${matriz[$2,$i]} | fold -w1))
-				for val in ${valores[@]}; do
-					[[ $val == ${teste[$3]} || $val == '#' ]] && { conf=1; break; }
-					conf=0
+		[[ ${teste[$3]} == '#' ]] && { checkfinal $final; test $showpath = on && showpath;  }
+		for i in ${!estados[@]}; do
+			local conf=0
+			local loop=0
+			if [[ ${visitados[$2,$i]} -eq 1 ]]; then
+				for n in ${!estados[@]}; do
+					[[ ${visitados[$i,$n]} -eq 1 ]] && { loop=1;break; }
 				done
+			fi
+			valores=($(echo ${matriz[$2,$i]} | fold -w1))
+			for val in ${valores[@]}; do
+				[[ $val == ${teste[$3]} || $val == '#'  ]] && { conf=1; break; }
+				conf=0
+			done
+			[[ $loop -eq 1 ]] && conf=0
 			if [[ $conf -eq 1 ]]; then
+				[[ $val == '#' ]] && visitados[$2,$i]=1
 				atual[$1]=$i
 				unset atual[$1+1]
 				let inseridos=$1+1
 				let test=$3+1
-				[[ ${matriz[$2,$i]} == '#' ]] && let test--
+				if [[ ${matriz[$2,$i]} == '#' ]]; then
+					 let test--
+				else
+					unset visitados
+				fi
 				verificar $inseridos $i $test
 			fi
-			done
+		done
 	fi
 }
 while true; do
@@ -178,6 +191,8 @@ while true; do
 	showmatrix=off; showinfo=off
 	test $mult = on && { echo;  echo "--  ${teste[@]}  --"; }
 	for it in ${args[@]}; do
+		unset visitados
+		declare -gA visitados
 		inicio $it
 		for init in ${initials[@]}; do
 			check="Nao"
