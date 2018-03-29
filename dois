@@ -85,7 +85,7 @@ caminho(){
 		local next=''
 		for i in $(echo $atual | sed "s:,::g" | grep -o .); do
 			for (( k = 0; k < ${#grafo[@]}; k=k+3 )); do
-				if [[ ${grafo[$k]} == "$i" && ${grafo[$k+1]} == "$j" ]];then
+				if [[ ${grafo[$k+1]} == "#" || ${grafo[$k]} == "$i" && ${grafo[$k+1]} == "$j" ]];then
 					next="$next${grafo[$k+2]}"
 				fi
 			done
