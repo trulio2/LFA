@@ -90,16 +90,26 @@ caminho(){
 				fi
 			done
 		done
+		[[ -z $next ]] && break
 		next=$(echo $next | grep -o . | sort -n | tr -d '\n')
 		atual=$(echo $next | tr -s '\0-\255')
 	done
 }
 while true; do
 	read teste
+	c=1
 	[[ -z $teste ]] && exit 0;
 	teste=($(echo $teste | grep -o .))
-	caminho $inicial
+	for i in ${teste[@]}; do
+		b=0
+		for j in ${transicoes[@]}; do
+			[[ $i == $j || $i == "#" ]] && { b=1; break; }
+		done
+		[[ $b -eq 0 ]] && { c=0; break; }
+	done
+	[[ $c -eq 1 ]] && caminho $inicial
 	result="Nao"
+	[[ $c -eq 1 ]] && {
 	for i in $(echo ${atual[@]} | grep -o .); do
 		for j in ${finais[@]}; do
 			if [[ "$i" == "$j" ]]; then
@@ -107,6 +117,6 @@ while true; do
 			fi
 		done
 		[[ "$result" == "Sim" ]] && break;
-	done
+	done;}
 	echo $result
 done
