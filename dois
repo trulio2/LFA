@@ -1,27 +1,8 @@
 #! /bin/bash
-declare -a list=(1001 1002 1003 1004)
-
-show() {
-    local -a results=()
-    let idx=$2
-    for (( j = 0; j < $1; j++ )); do
-        if (( idx % 2 )); then results=("${results[@]}" "${list[$j]}"); fi
-        let idx\>\>=1
-    done
-    echo "${results[@]}"
-}
-
-let n=${#list[@]}
-for (( i = 1; i < 2**n; i++ )); do
-    show $n $i
-done
-
-#!/bin/bash
 ifss=$IFS
 IFS='[';
 j=0;
 for i in `cat $1`; do
-
 	linha[$j]=`echo $i | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " " | tr , " "`
 	let j++
 done
@@ -31,27 +12,101 @@ transicoes=${linha[3]};
 finais=${linha[${#linha[@]}-1]};
 iniciais=${linha[${#linha[@]}-2]};
 
-echo "estados    ::  $estados"
-echo "transicoes ::  $transicoes"
-echo "iniciais   ::  $iniciais"
-echo "finais     ::  $finais"
-IFS=$ifss
+for (( i = 4; i < ${#linha[@]} -2; i++ ));do
+	grafo="$grafo${linha[$i]}"
+done
 
+IFS=$ifss
+grafo=(${grafo})
+grafo[${#grafo[@]}-1]="${grafo[${#grafo[@]}-1]}" | head -n 1
 estados=($estados)
 transicoes=($transicoes)
 iniciais=($iniciais)
 finais=($finais)
-tam=${#estados[@]}
-let tam2=2**tam
 
-gerar(){
-	let n=$1+1
-	[[ -z ${estados[$1]} ]] || { l=${estados[$1]} ; echo $l; }
+for i in ${!finais[@]}; do
+	for j in ${!estados[@]}; do
+		if [[ ${finais[$i]} == ${estados[$j]} ]]; then
+			let b=141+$j
+			finais[$i]=$(echo -e "\0$b")
+			break;
+		fi
+	done
 
-	if [[ $1 -lt $tam ]]; then
-		gerar $n
-	fi
+done
 
+for i in ${!iniciais[@]}; do
+	for j in ${!estados[@]}; do
+		if [[ ${iniciais[$i]} == ${estados[$j]} ]]; then
+			let b=141+$j
+			iniciais[$i]=$(echo -e "\0$b")
+			break;
+		fi
+	done
+
+done
+
+for (( i = 0; i < ${#grafo[@]} ; i+=3 )); do
+	for j in ${!estados[@]}; do
+		if [[ ${grafo[$i]} == ${estados[$j]} ]]; then
+			let b=141+$j
+			grafo[$i]=$(echo -e "\0$b")
+			break;
+		fi
+	done
+
+done
+for (( i = 2; i < ${#grafo[@]} ; i+=3 )); do
+	for j in ${!estados[@]}; do
+		if [[ ${grafo[$i]} == ${estados[$j]} ]]; then
+			let b=141+$j
+			grafo[$i]=$(echo -e "\0$b")
+			break;
+		fi
+	done
+
+done
+
+
+for i in ${!estados[@]}; do
+	let b=141+$i
+	estados[$i]=$(echo -e "\0$b")
+done
+
+for ((i = 0; i < ${#estado[@]}; i++ )); do
+	estados[$i]=$(echo ${estado[$i]} | sed "s:\ :,:g")
+done
+
+inicial=$(echo ${iniciais[@]} | sed "s:\ :,:g")
+
+caminho(){
+	atual=$1
+	for j in ${teste[@]}; do
+		local next=''
+		for i in $(echo $atual | sed "s:,::g" | grep -o .); do
+			for (( k = 0; k < ${#grafo[@]}; k=k+3 )); do
+				if [[ ${grafo[$k]} == "$i" && ${grafo[$k+1]} == "$j" ]];then
+					next="$next${grafo[$k+2]}"
+				fi
+			done
+		done
+		next=$(echo $next | grep -o . | sort -n | tr -d '\n')
+		atual=$(echo $next | tr -s '\0-\255')
+	done
 }
-
-gerar 0
+while true; do
+	read teste
+	[[ -z $teste ]] && exit 0;
+	teste=($(echo $teste | grep -o .))
+	caminho $inicial
+	result="Nao"
+	for i in $(echo ${atual[@]} | grep -o .); do
+		for j in ${finais[@]}; do
+			if [[ "$i" == "$j" ]]; then
+				result="Sim";
+			fi
+		done
+		[[ "$result" == "Sim" ]] && break;
+	done
+	echo $result
+done
