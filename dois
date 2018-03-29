@@ -81,18 +81,26 @@ inicial=$(echo ${iniciais[@]} | sed "s:\ :,:g")
 
 caminho(){
 	atual=$1
-	for j in ${teste[@]}; do
+	for (( j = 0; j < ${#teste[@]}; j++ )); do
+		echo -n "$j  $atual -> "
+		a=$atual
+		t=${teste[$j]}
 		local next=''
+		n=0
 		for i in $(echo $atual | sed "s:,::g" | grep -o .); do
 			for (( k = 0; k < ${#grafo[@]}; k=k+3 )); do
-				if [[ ${grafo[$k+1]} == "#" || ${grafo[$k]} == "$i" && ${grafo[$k+1]} == "$j" ]];then
+				if [[ ${grafo[$k]} == "$i" && ${grafo[$k+1]} == "#" || ${grafo[$k]} == "$i" && ${grafo[$k+1]} == $t ]]; then
 					next="$next${grafo[$k+2]}"
+					[[ ${grafo[$k+1]} == "#" && $n == 0 ]] && { let n=1; }
 				fi
 			done
 		done
-		[[ -z $next ]] && break
 		next=$(echo $next | grep -o . | sort -n | tr -d '\n')
 		atual=$(echo $next | tr -s '\0-\255')
+		echo $atual
+		[[ $n -eq 1 ]] && { let j--; }
+		[[ $a == $atual && $n -eq 1 ]] && { let j++; }
+
 	done
 }
 while true; do
