@@ -1,0 +1,39 @@
+#!/bin/bash
+ifss=$IFS
+IFS='[';
+j=0;
+for i in `cat $1`; do
+
+	linha[$j]=`echo $i | tr -d \"}{]: | sed "s:,:,\ :g" | tr -d " " | tr , " "`
+	let j++
+done
+
+estados=${linha[2]};
+transicoes=${linha[3]};
+finais=${linha[${#linha[@]}-1]};
+iniciais=${linha[${#linha[@]}-2]};
+
+echo "estados    ::  $estados"
+echo "transicoes ::  $transicoes"
+echo "iniciais   ::  $iniciais"
+echo "finais     ::  $finais"
+IFS=$ifss
+
+estados=($estados)
+transicoes=($transicoes)
+iniciais=($iniciais)
+finais=($finais)
+tam=${#estados[@]}
+let tam2=2**tam
+
+gerar(){
+	let n=$1+1
+	[[ -z ${estados[$1]} ]] || { l=${estados[$1]} ; echo $l; }
+
+	if [[ $1 -lt $tam ]]; then
+		gerar $n
+	fi
+
+}
+
+gerar 0
